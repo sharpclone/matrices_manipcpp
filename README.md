@@ -5,3 +5,4 @@ A single header file for all your operations with matrices in C++, this includes
 - Multiplying
 - Bringing a matrix to a echelon form [multiple methods] : Gauss or Pivot
 - Finding the determinant of a matrix
+- Solving linear systems, check if its a compatible or incompatible system
