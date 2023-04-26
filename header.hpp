@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+#include <iomanip>
 using namespace std;
 
 // CONSTANTE
@@ -37,13 +38,21 @@ template <class T> void arrayCopy(T A[][N], T B[][N], int n, int m) {
 
 /*print matrix*/
 template <class T>
-void mprint(T A[][N], int rows, int cols, string matrixName = "none") {
+void mprint(T A[][N], int rows, int cols, string matrixName = "none", int setPrec = 0, bool NeedApprx = 0,
+               const double TOLERANCE = 1e-6) {
   if (matrixName != "none") {
     cout << "Matricea " << matrixName << ": \n";
   }
   for (int i = 0; i < rows; i++) {
     for (int j = 0; j < cols; j++) {
-      cout << A[i][j] << " ";
+      if(abs(A[i][j])<TOLERANCE){
+        A[i][j] = 0;
+      }
+      if(setPrec){
+      cout << setprecision(setPrec) <<A[i][j] << " ";
+      } else{
+        cout << A[i][j] << " ";
+      }
     }
     cout << "\n";
   }
@@ -256,7 +265,8 @@ check:
 
 /*Metoda de calcul determinant iterativa Gauss, reliable ? , takes only
  * number of rows*/
-template <class T> double myDet(T a[][N], int n) {
+template <class T> double myDet(T a[][N], int n,bool NeedApprx = 0,
+               const double TOLERANCE = 1e-6) {
   double det = 1;
   int count = 0;
   if (a[0][0] == 0) {             // daca primul element e zero
@@ -282,6 +292,9 @@ template <class T> double myDet(T a[][N], int n) {
   esalonare2(a, n, n, "gauss", 0,1,1e-6); // esalonare prin gauss
   for (int i = 0; i < n; i++) {
     det *= a[i][i]; // determinantul e produsul liniei
+  }
+  if(abs(det)<TOLERANCE){
+    return 0;
   }
   return det;
 }
@@ -347,7 +360,7 @@ template <class T> double solveLinearSystem(T A[][N], T B[N], T X[N], int n) {
   return 0;
 }
 
-/*Rezolvarea unui sistem liniar prin chestii complicat de explicat*/
+/*Rezolvarea unui sistem liniar prin chestii complicat de explicat(Gauss)*/
 template <class T> bool solveLinearSystem2(T A[][N], T B[N], T X[N], int n) {
   // Gaussian elimination with partial pivoting
   for (int k = 0; k < n - 1; k++) {
@@ -393,4 +406,29 @@ template <class T> bool solveLinearSystem2(T A[][N], T B[N], T X[N], int n) {
     }
   }
   return true; // consistent system
+}
+
+/*Functie ce da remove la o linie si coloana*/
+template <class T> void removeRowCol(T A[][N], T finalArr[][N], int n, int m, int rRow, int rCol){
+  int rowOffset = 0;
+  int colOffset = 0;
+  
+  // Iterate over each element in A, except the removed row and column
+  for(int i = 0; i < n; i++){
+    if(i == rRow){  // Skip the removed row
+      rowOffset = 1;
+      continue;
+    }
+    
+    colOffset = 0;
+    for(int j = 0; j < m; j++){
+      if(j == rCol){  // Skip the removed column
+        colOffset = 1;
+        continue;
+      }
+      
+      // Copy the element to the new array
+      finalArr[i-rowOffset][j-colOffset] = A[i][j];
+    }
+  }
 }
