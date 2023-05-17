@@ -1,11 +1,37 @@
-#include <bits/stdc++.h>
+#include <iostream>
 #include <iomanip>
+#include <cmath>
+#include <fstream>
 using namespace std;
 
 // CONSTANTE
 #define N 100
-
 /*Template se foloseste ca o functie sa poate lua orice tip de date*/
+
+/*Citeste o matrice*/
+template <class T>
+void readMatrix(T A[][N], int n, int m, string fileName = "none") {
+  if(fileName != "none"){
+    ifstream fin(fileName);
+    int n1, m1;
+    fin >> n1 >> m1;
+    for(int i = 0; i < n1; i++){
+      for(int j = 0; j < m1; j++){
+        fin >> A[i][j];
+      }
+    }
+  }else{
+    for(int i = 0; i < n; i++){
+      for(int j = 0; j < m; j++){
+        cin >> A[i][j];
+      }
+    }
+  }
+
+ 
+ 
+
+}
 
 /*Add matrices*/
 template <class T>
@@ -35,11 +61,28 @@ template <class T> void arrayCopy(T A[][N], T B[][N], int n, int m) {
     }
   }
 }
+/* Interval array-copy */
+template <class T>
+void intervalCopy(T A[][N], T B[][N], int from_n, int to_n, int from_m, int to_m) {
+  if ((to_n < from_n) || (to_m < from_m)) {
+    cout << "Can't copy array, check start/end of copy\n";
+    return;
+  }
+
+  for (int i = from_n; i <= to_n; i++) {
+    for (int j = from_m; j <= to_m; j++) {
+      B[i - from_n][j - from_m] = A[i][j];
+    }
+  }
+}
+
+
+
 
 /*print matrix*/
 template <class T>
-void mprint(T A[][N], int rows, int cols, string matrixName = "none", int setPrec = 0, bool NeedApprx = 0,
-               const double TOLERANCE = 1e-6) {
+void mprint(T A[][N], int rows, int cols, string matrixName = "none", int setPrec = 2, bool NeedApprx = 1,
+               const double TOLERANCE = 1e-6, int width =5) {
   if (matrixName != "none") {
     cout << "Matricea " << matrixName << ": \n";
   }
@@ -49,7 +92,7 @@ void mprint(T A[][N], int rows, int cols, string matrixName = "none", int setPre
         A[i][j] = 0;
       }
       if(setPrec){
-      cout << setprecision(setPrec) <<A[i][j] << " ";
+      cout << setprecision(setPrec) << fixed << setw(width) << A[i][j] << " ";
       } else{
         cout << A[i][j] << " ";
       }
@@ -260,13 +303,16 @@ check:
       }
     }
   }
+  return 0;
 }
 
 
 /*Metoda de calcul determinant iterativa Gauss, reliable ? , takes only
  * number of rows*/
-template <class T> double myDet(T a[][N], int n,bool NeedApprx = 0,
+template <class T> double myDet(T A[][N], int n,bool NeedApprx = 0,
                const double TOLERANCE = 1e-6) {
+  T a[N][N];
+  arrayCopy(A,a,n,n);
   double det = 1;
   int count = 0;
   if (a[0][0] == 0) {             // daca primul element e zero
@@ -289,7 +335,7 @@ template <class T> double myDet(T a[][N], int n,bool NeedApprx = 0,
       }
     }
   }
-  esalonare2(a, n, n, "gauss", 0,1,1e-6); // esalonare prin gauss
+  esalonare2(a, n, n, "pivot", 0,1,1e-6); // esalonare prin pivot
   for (int i = 0; i < n; i++) {
     det *= a[i][i]; // determinantul e produsul liniei
   }
@@ -300,7 +346,9 @@ template <class T> double myDet(T a[][N], int n,bool NeedApprx = 0,
 }
 
 /*Metoda de calcul determinant de pe internet, reliable */
-template <class T> double det(T a[][N], int n) {
+template <class T> double det(T A[][N], int n) {
+  T a[N][N];
+  arrayCopy(A,a,n,n);
   double det = 1;
   for (int i = 0; i < n; i++) { // Itereaza printre linii
     int k = i;
@@ -431,4 +479,23 @@ template <class T> void removeRowCol(T A[][N], T finalArr[][N], int n, int m, in
       finalArr[i-rowOffset][j-colOffset] = A[i][j];
     }
   }
+}
+
+
+/*Invert a matrix*/
+template <class T> void inverseMatrix(T A[][N], T inv[][N] , int n, double TOLERANCE = 1e-6){
+  double determinant = det(A,n);
+  if(abs(determinant) <= TOLERANCE ){
+    cout << "Determinantul e zero, nu exista inversa \n";
+    return;
+  }
+  T tempArray[N][N];
+  double detMinor;
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        removeRowCol(A, tempArray, n, n, i, j);
+        detMinor = det(tempArray, n - 1);
+        inv[j][i] = pow(-1, i + j) * detMinor / determinant;
+      }
+    }
 }
